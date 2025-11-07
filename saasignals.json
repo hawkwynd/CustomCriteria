@@ -1,0 +1,74 @@
+[{
+    "timestamp": "2024-10-16T17:47:00Z",
+    "event": "SAASignalsFound",
+    "BodyName": "Flyooe Hypue BY-P c19-0 A 1 A Ring",
+    "SystemAddress": 84120082602,
+    "BodyID": 6,
+    "Signals": [
+        {
+            "Type": "Serendibite",
+            "Count": 1
+        },
+        {
+            "Type": "Rhodplumsite",
+            "Count": 2
+        },
+        {
+            "Type": "Platinum",
+            "Count": 2
+        },
+        {
+            "Type": "Painite",
+            "Count": 1
+        }
+    ],
+    "Genuses": []
+},
+{
+    "timestamp": "2024-10-16T17:53:25Z",
+    "event": "SAASignalsFound",
+    "BodyName": "Flyooe Hypue BY-P c19-0 A 2 B Ring",
+    "SystemAddress": 84120082602,
+    "BodyID": 9,
+    "Signals": [
+        {
+            "Type": "Serendibite",
+            "Count": 2
+        },
+        {
+            "Type": "Alexandrite",
+            "Count": 3
+        },
+        {
+            "Type": "Benitoite",
+            "Count": 1
+        },
+        {
+            "Type": "Monazite",
+            "Count": 4
+        }
+    ],
+    "Genuses": []
+},
+{
+    "timestamp": "2024-10-16T17:53:26Z",
+    "event": "SAASignalsFound",
+    "BodyName": "Flyooe Hypue BY-P c19-0 A 2 A Ring",
+    "SystemAddress": 84120082602,
+    "BodyID": 8,
+    "Signals": [
+        {
+            "Type": "Serendibite",
+            "Count": 1
+        },
+        {
+            "Type": "Rhodplumsite",
+            "Count": 1
+        },
+        {
+            "Type": "Monazite",
+            "Count": 1
+        }
+    ],
+    "Genuses": []
+}]

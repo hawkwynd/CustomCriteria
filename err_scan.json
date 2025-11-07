@@ -1,0 +1,152 @@
+4/21/2024 12:51:38 PM	Error Reading Custom Criteria File	[string "chunk"]:155: <eof> expected near 'end'	 "Small object" notification.
+]]--
+triggerForSmallObject       = true
+triggerRadiusNotification   = true
+smallBodyThreshold          = 400000 -- (400000 == 400 km)
+spaceTaterThreshold         = 200000 -- 200 km 
+kmInLS                  = 299792458    -- how many kilometers per light second
+terraMoonThreshold          = 2
+
+function round(n)
+    return math.floor((math.floor(n*2) + 1)/2)
+end
+
+function Round(num, dp)
+    local mult = 10^(dp or 0)
+    return math.floor(num * mult + 0.5)/mult
+end
+
+
+function comma_value(amount)
+    local formatted = amount
+    while true do  
+      formatted, k = string.gsub(formatted, "^(-?%d+)(%d%d%d)", '%1,%2')
+      if (k==0) then
+        break
+      end
+    end
+    return formatted
+  end
+
+  -- Max and average levels crunched from EDAstro's Surface Materials spreadsheet, available here:
+-- https://edastro.com/mapcharts/files.html
+-- and a python script of my own making (but mostly made by the authors of the dask and pandas libraries)
+-- If you want a copy
+
+maxLevels = {
+    ['antimony']=1.82,
+    ['arsenic']=3.03,
+    ['cadmium']=3.77,
+    ['carbon']=33.91,
+    ['chromium']=18.7,
+    ['germanium']=6.54,
+    ['iron']=48.85,
+    ['manganese']=17.36,
+    ['mercury']=2.13,
+    ['molybdenum']=3.18,
+    ['nickel']=36.94,
+    ['niobium']=3.32,
+    ['phosphorus']=21.71,
+    ['polonium']=2.09,
+    ['ruthenium']=2.97,
+    ['selenium']=6.15,
+    ['sulphur']=40.33,
+    ['technetium']=1.74,
+    ['tellurium']=1.75,
+    ['tin']=3.25,
+    ['tungsten']=2.68,
+    ['vanadium']=16.98,
+    ['yttrium']=2.87,
+    ['zinc']=12.29,
+    ['zirconium']=5.58
+}
+avgLevels = {
+    ['antimony']=0.91,
+    ['arsenic']=1.97,
+    ['cadmium']=1.33,
+    ['carbon']=18.47,
+    ['chromium']=7.73,
+    ['germanium']=4.29,
+    ['iron']=17.17,
+    ['manganese']=7.12,
+    ['mercury']=0.75,
+    ['molybdenum']=1.12,
+    ['nickel']=12.99,
+    ['niobium']=1.17,
+    ['phosphorus']=11.83,
+    ['polonium']=0.48,
+    ['ruthenium']=1.07,
+    ['selenium']=3.69,
+    ['sulphur']=21.97,
+    ['technetium']=0.62,
+    ['tellurium']=1.1,
+    ['tin']=1.07,
+    ['tungsten']=0.94,
+    ['vanadium']=4.33,
+    ['yttrium']=1.04,
+    ['zinc']=4.77,
+    ['zirconium']=2.1
+}
+
+-- Percent below max value that's labeled as "high", by default 0.25 = 75% below maximum known value
+desperationLevel = 0.25
+
+-- Whether above average values should trigger a notification
+aboveAverage = true
+
+-- Similar to desperationLevel, but as the percent above the average value
+aboveAverageLevel = 0.0
+
+-- List all of the materials that you want to be alerted for here
+wantedMaterials = {'germanium','polonium','tungsten', 'vanadium', 'arsenic'}
+
+function getBodyType(scan)
+    return scan.BodyType ~=nill 
+end
+
+function getBodyGravity(scan)
+    local gravityCalc = (scan.SurfaceGravity/9.81)
+    return round( gravityCalc, 2) .. 'g'
+end
+
+function checkRawMatContent(scan)
+    local resResult = false
+    local resTitle, resDesc = ''
+    if scan.Landable then
+        for material in materials(scan.Materials) do
+            wanted = false
+            for index, value in ipairs(wantedMaterials) do
+                if value == material.name then
+        wanted = true
+                end
+            end
+            if wanted then
+                
+                local matName = material.name
+
+                if material.percent ~=null and  tonumber(material.percent) >= ((1 - desperationLevel) * tonumber(maxLevels[matName])) then
+                    resResult = true
+                    resDesc = getBodyType(scan) .. ' ' .. getBodyGravity(scan) ..string.char(10) .. 'Content: ' ..  string.format("%.1f", material.percent) .. ' %' -- icy body content: 0.3%
+                    
+                    if scan.Volcanism ~= nil and scan.Volcanism ~= '' then
+                        resTitle = 'High ' .. matName .. ' with volcanism'
+                    else
+                        resTitle = 'High ' .. matName 
+                    end
+
+                    -- else if aboveAverage and tonumber(material.percent) > ((1 - aboveAverageLevel) * (tonumber(avgLevels[matName]))) then
+                    -- resResult = true
+                    -- resDesc = matName .. ': ' .. string.format("%.1f", material.percent) .. ' %'
+                   
+                    -- if scan.Volcanism ~= nil and scan.Volcanism ~= '' then
+                    --     resTitle = 'Above average ' .. matName .. ' with volcanism'
+                    -- else
+                    --     resTitle = 'Above average ' .. matName 
+                    -- end
+                    
+                end
+            end
+        end
+        end
+        return resResult, resTitle, resDesc
+    end

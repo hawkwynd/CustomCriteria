@@ -1,0 +1,27 @@
+{
+    "timestamp": "2024-05-14T02:46:49Z",
+    "event": "Scan",
+    "ScanType": "Detailed",
+    "BodyName": "Slehue UI-K d8-0 12 A Ring",
+    "BodyID": 25,
+    "Parents": [
+        {
+            "Planet": 24
+        },
+        {
+            "Star": 0
+        }
+    ],
+    "StarSystem": "Slehue UI-K d8-0",
+    "SystemAddress": 16584297803,
+    "DistanceFromArrivalLS": 6488.762053,
+    "SemiMajorAxis": 45692870.914936,
+    "Eccentricity": 0.000000,
+    "OrbitalInclination": 0.000000,
+    "Periapsis": 0.000000,
+    "OrbitalPeriod": 36447.191238,
+    "AscendingNode": 0.000000,
+    "MeanAnomaly": 147.777436,
+    "WasDiscovered": false,
+    "WasMapped": false
+}

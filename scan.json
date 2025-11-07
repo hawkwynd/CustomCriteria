@@ -1,0 +1,67 @@
+{
+    "timestamp": "2024-07-01T02:05:49Z",
+    "event": "Scan",
+    "ScanType": "Detailed",
+    "BodyName": "Hypou Aip FC-C d13-7 2",
+    "BodyID": 12,
+    "Parents": [
+        {
+            "Null": 11
+        },
+        {
+            "Star": 0
+        }
+    ],
+    "StarSystem": "Hypou Aip FC-C d13-7",
+    "SystemAddress": 253025650547,
+    "DistanceFromArrivalLS": 2166.295179,
+    "TidalLock": true,
+    "TerraformState": "",
+    "PlanetClass": "Sudarsky class III gas giant",
+    "Atmosphere": "",
+    "AtmosphereComposition": [
+        {
+            "Name": "Hydrogen",
+            "Percent": 73.637749
+        },
+        {
+            "Name": "Helium",
+            "Percent": 26.362249
+        }
+    ],
+    "Volcanism": "",
+    "MassEM": 1136.820435,
+    "Radius": 76744040.000000,
+    "SurfaceGravity": 76.932879,
+    "SurfaceTemperature": 413.538666,
+    "SurfacePressure": 0.000000,
+    "Landable": false,
+    "SemiMajorAxis": 5556804418.563843,
+    "Eccentricity": 0.037299,
+    "OrbitalInclination": -1.902438,
+    "Periapsis": 233.908543,
+    "OrbitalPeriod": 7898450.314999,
+    "AscendingNode": 49.532375,
+    "MeanAnomaly": 274.740421,
+    "RotationPeriod": 11229575.084155,
+    "AxialTilt": -0.401004,
+    "Rings": [
+        {
+            "Name": "Hypou Aip FC-C d13-7 2 A Ring",
+            "RingClass": "eRingClass_Rocky",
+            "MassMT": 2.2976e+11,
+            "InnerRad": 1.4257e+08,
+            "OuterRad": 1.7027e+08
+        },
+        {
+            "Name": "Hypou Aip FC-C d13-7 2 B Ring",
+            "RingClass": "eRingClass_Rocky",
+            "MassMT": 2.7316e+12,
+            "InnerRad": 1.7037e+08,
+            "OuterRad": 3.6333e+08
+        }
+    ],
+    "ReserveLevel": "PristineResources",
+    "WasDiscovered": false,
+    "WasMapped": false
+}
