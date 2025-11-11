@@ -105,32 +105,38 @@ aboveAverageLevel = 0.0
 -- List all of the materials that you want to be alerted for here
 wantedMaterials = {'germanium','polonium','iron', 'tungsten', 'sulfur', 'nickel', 'vanadium', 'arsenic'}
 
-function checkRawMatContent(scan)
+
+function checkRawMatContent( scan )
     local resResult = false
-    local resTitle, resDesc = ''
+    local resTitle  = ''
+    local resDesc   = ''
+
     if scan.Landable then
         for material in materials(scan.Materials) do
-            wanted = false
+            local wanted = false
             for index, value in ipairs(wantedMaterials) do
                 if value == material.name then
-        wanted = true
+                    wanted = true
+                    break
                 end
             end
-            if wanted then
-                
-                local matName = material.name
 
-                if material.percent ~=null and  tonumber(material.percent) >= ((1 - desperationLevel) * tonumber(maxLevels[matName])) then
+            if wanted then
+                local matName = material.name
+                local percent = tonumber(material.percent)
+
+                if percent ~= nil and percent >= ((1 - desperationLevel) * tonumber(maxLevels[matName])) then
                     resResult = true
-                    resDesc = 'Content: ' .. string.format("%.1f", material.percent) .. ' %'
+                    resDesc = 'Content: ' .. string.format("%.1f", percent) .. ' %'
                     if scan.Volcanism ~= nil and scan.Volcanism ~= '' then
                         resTitle = 'High ' .. matName .. ' content with volcanism'
                     else
                         resTitle = 'High ' .. matName .. ' content'
                     end
-                else if aboveAverage and tonumber(material.percent) > ((1 - aboveAverageLevel) * (tonumber(avgLevels[matName]))) then
+
+                elseif aboveAverage and percent ~= nil and percent > ((1 - aboveAverageLevel) * tonumber(avgLevels[matName])) then
                     resResult = true
-                    resDesc = 'Content: ' .. string.format("%.1f", material.percent) .. ' %'
+                    resDesc = 'Content: ' .. string.format("%.1f", percent) .. ' %'
                     if scan.Volcanism ~= nil and scan.Volcanism ~= '' then
                         resTitle = 'Above average ' .. matName .. ' content with volcanism'
                     else
@@ -139,10 +145,12 @@ function checkRawMatContent(scan)
                 end
             end
         end
-        end
-        return resResult, resTitle, resDesc
     end
+
+    return resResult, resTitle, resDesc
+    
 end
+
 
 -- For use in Atmospheric Landables and Bios
 function math.round(Value, Precision)
@@ -159,13 +167,13 @@ function math.round(Value, Precision)
 -- ::Detail::
 -- 'Type ' .. scan.StarType .. ' age ' .. comma_value(scan.Age_MY) .. ' my'
 
--- -- Materials Rare 
--- ::Criteria::
---     resResult, resTitle, resDesc = checkRawMatContent(scan)
---     if resResult then
---         return resResult, resTitle, resDesc
---     end
--- ::End::
+-- Materials Rare 
+::Criteria::
+    resResult, resTitle, resDesc = checkRawMatContent(scan)
+    if resResult then
+        return resResult, resTitle, resDesc
+    end
+::End::
 
 
 -- Rings of Interest 

@@ -152,66 +152,55 @@ function getBodyGravity(scan)
     end
 end
 
-
 function checkRawMatContent( scan )
-    
+    local resResult = false
+    local resTitle  = ''
+    local resDesc   = ''
+
     if scan.Landable then
-            
-        local resResult = false
-        -- local resTitle = 'restTitle value here.'
-        local resDesc  = 'No wanted materials found'
-        local matName = ''
-        local matDesc = ''
-        local matPercentage = 0
-        local wanted  = false 
-        
-        -- wantedMaterials = { 'tungsten', 'cadmium', 'polonium','nickel','carbon','vanadium','niobium','germanium','yttrium','arsenic'}
-
-        for index, wantedValue in ipairs( wantedMaterials ) do
-
-            for material in materials( scan.Materials ) do
-                
-                if material.name == wantedValue then
-                    resDesc       = ''
-                    resResult     = true
-                    matName       = material.name
-                    matPercentage = string.format( "%.1f", material.percent )
-        
-                --    if aboveAverage and tonumber(material.percent) > ((1 - aboveAverageLevel) * (tonumber(avgLevels[matName]))) then
-        
-                    matDesc = matName .. ':' .. matPercentage .. ' %' .. string.char(10)
-                    resDesc = resDesc .. matDesc
-
-                --    end 
-                      
-                    -- end -- if aboveAverage
-                end -- if material.name == value
+        for material in materials(scan.Materials) do
+            local wanted = false
+            for index, value in ipairs(wantedMaterials) do
+                if value == material.name then
+                    wanted = true
+                    break
+                end
             end
-        
-        end -- for material in material
 
-        return resResult, resDesc
-        
+            if wanted then
+                local matName = material.name
+                local percent = tonumber(material.percent)
+
+                if percent ~= nil and percent >= ((1 - desperationLevel) * tonumber(maxLevels[matName])) then
+                    resResult = true
+                    resDesc = 'Content: ' .. string.format("%.1f", percent) .. ' %'
+                    if scan.Volcanism ~= nil and scan.Volcanism ~= '' then
+                        resTitle = 'High ' .. matName .. ' content with volcanism'
+                    else
+                        resTitle = 'High ' .. matName .. ' content'
+                    end
+
+                elseif aboveAverage and percent ~= nil and percent > ((1 - aboveAverageLevel) * tonumber(avgLevels[matName])) then
+                    resResult = true
+                    resDesc = 'Content: ' .. string.format("%.1f", percent) .. ' %'
+                    if scan.Volcanism ~= nil and scan.Volcanism ~= '' then
+                        resTitle = 'Above average ' .. matName .. ' content with volcanism'
+                    else
+                        resTitle = 'Above average ' .. matName .. ' content'
+                    end
+                end
+            end
+        end
     end
 
+   return resResult, resTitle, resDesc
 end
+
 
 
 ::End:: -- Global
 
 -- Begin Criteria sections ----------------------------------------------------------------
-
-------------------------
--- RARE MATERIALS, CHECK
-------------------------
--- ::Criteria::
---   if triggerForMaterials and scan.Landable then
---     resResult, resTitle, resDesc = checkRawMatContent(scan)
---     if resResult then
---         return resResult, resTitle, resDesc
---     end
--- end
--- ::End::
 
 
 ------------------------------------------------------------------------------
@@ -270,15 +259,15 @@ if result then
             -- If we're under 0.4 ls from the parent
             canLand = canLand .. getOrbitalDistance(scan)
 
-            -- if resDesc then
-                -- canLand = canLand .. resTitle 
-                -- if resResult then 
-                --     matContent = resDesc
-                -- end 
+            if resDesc then
+                canLand = canLand .. resTitle 
+                if resResult then 
+                    matContent = resDesc
+                end 
 
-                return true, canLand, 'Radius: ' .. math.floor(scan.Radius/1000) .. ' km' ..  string.char(10) ..'Oribtal distance: ' .. orbitalDistance.. ' ls' .. string.char(10).. 'Gravity: ' .. gravityCalc .. string.char(10)
+                return true, canLand, 'Radius: ' .. math.floor(scan.Radius/1000) .. ' km' ..  string.char(10) ..'Oribtal distance: ' .. orbitalDistance.. ' ls' .. string.char(10).. 'Gravity: ' .. gravityCalc .. string.char(10) 
 
-            -- end
+            end
 
     end -- triggerRadiusNotification
 
@@ -287,18 +276,20 @@ end -- result
 
 
 
--- ::Criteria::
--- if triggerForOrbitalDistance and scan.Landable then 
---     local orbitalDistance = Round( scan.SemiMajorAxis/kmInLS, 2)
---     if orbitalDistance < .4 then 
-        
---         -- local  resResult, resTitle
---         -- resDesc = checkRawMatContent( scan )
+::Criteria::
+if triggerForOrbitalDistance and scan.Landable then 
+    
+    local resResult, resTitle, resDesc
+    local orbitalDistance = Round( scan.SemiMajorAxis/kmInLS, 2)
 
---         return "Landable ".. scan.PlanetClass .. " *Prime Photo Body", " Orbital Distance " .. orbitalDistance .. " ls"
---     end
--- end
--- ::End::
+    -- if orbitalDistance < .4 then 
+        resTitle, resResult, resDesc = checkRawMatContent( scan )
+
+        return resResult, resTitle, resDesc
+
+    -- end
+end
+::End::
 
 
 --------------------------------------------------------
@@ -364,9 +355,18 @@ end
 ::End::
 
 -----------------------
--- UNDISCOVERED SYSTEM 
+-- LANADBLES 
 -----------------------
 
+::Criteria::
+if scan.Landable then 
+    return "Landable " ..scan.PlanetClass , "Radius " .. math.floor(scan.Radius/1000) .. "km"
+end
+::End::
+
+-----------------------
+-- UNDISCOVERED SYSTEM 
+-----------------------
 ::Criteria::
 if triggerForUndiscoveredSystem == true then
 	if scan.ScanType ~= "NavBeaconDetail" and scan.PlanetClass ~= "Barycentre" and not scan.WasDiscovered and scan.DistanceFromArrivalLS == 0 then
@@ -379,37 +379,38 @@ end
 -- 4.1: GEOLOGICAL SIGNALS
 --------------------------
 --Triggers for any body containing geological signals, returns the number of signals, the type of volcanism present, and the average surface temp.
--- ::Criteria::
--- if triggerForGeoSignals == true then
--- 	if scan.Landable then
+::Criteria::
+if triggerForGeoSignals == true then
+	if scan.Landable then
 
---         local photoOp = getOrbitalDistance( scan )
---         local first = scan.Volcanism:sub(1,1)
---         local last = scan.Volcanism:sub(2)
---         local radiusKm      = math.floor(scan.Radius/1000)
---         local gravityCalc   = getBodyGravity(scan)
---         local orbitalDistance = Round( scan.SemiMajorAxis/kmInLS, 2)
+        local photoOp           = getOrbitalDistance( scan )
+        local first             = scan.Volcanism:sub(1,1)
+        local last              = scan.Volcanism:sub(2)
+        local radiusKm          = math.floor(scan.Radius/1000)
+        local gravityCalc       = getBodyGravity(scan)
+        local orbitalDistance   = Round( scan.SemiMajorAxis/kmInLS, 2)
 
---         -- local atmosphere = scan.atmosphere 
+        -- local atmosphere = scan.atmosphere 
         
--- 	    if geosignals > 0 then
---             return true, "Landable " .. scan.PlanetClass .. ' with ' .. geosignals .. ' geologic signals' .. photoOp , 'Radius: ' .. radiusKm .. ' km' .. string.char(10).. 'Orbital Distance: ' .. orbitalDistance .. ' ls' .. string.char(10).. 'Gravity: ' .. gravityCalc .. 'g' .. string.char(10) ..first .. last 
--- 	    end
--- 	end
--- end
--- ::End::
+	    if geosignals > 0 then
+            return true, "Landable " .. scan.PlanetClass .. ' with ' .. geosignals .. ' geologic signals' .. photoOp , 'Radius: ' .. radiusKm .. ' km' .. string.char(10).. 'Orbital Distance: ' .. orbitalDistance .. ' ls' .. string.char(10).. 'Gravity: ' .. gravityCalc .. 'g' .. string.char(10) ..first .. last 
+	    end
+	end
+end
+::End::
 
--- -- Helium rich boxel?
--- ::Criteria::
--- if(scan.StarSystem and scan.PlanetClass and (string.match(scan.PlanetClass,'Helium') or string.match(scan.PlanetClass,'Sudarsky') or string.match(scan.PlanetClass, 'gas giant') )) then
---     this_boxel = scan.StarSystem:gsub('[%d-]+$','')
---     if(this_boxel ~= last_helium_boxel) then
---         for mat in materials(scan.AtmosphereComposition) do
---             if mat.name == 'Helium' and mat.percent >= MINIMUM_HELIUM_FOR_NOTIFICATION then
---                 last_helium_boxel = this_boxel
---                 return true,'Possible High Helium Boxel',string.format("%.2f", mat.percent) .. '% Helium'
---             end
---         end
---     end
--- end
--- ::End::
+-- Helium rich boxel?
+::Criteria::
+if(scan.StarSystem and scan.PlanetClass and (string.match(scan.PlanetClass,'Helium') or string.match(scan.PlanetClass,'Sudarsky') or string.match(scan.PlanetClass, 'gas giant') )) then
+    this_boxel = scan.StarSystem:gsub('[%d-]+$','')
+    if(this_boxel ~= last_helium_boxel) then
+        for mat in materials(scan.AtmosphereComposition) do
+            if mat.name == 'Helium' and mat.percent >= MINIMUM_HELIUM_FOR_NOTIFICATION then
+                last_helium_boxel = this_boxel
+                return true,'Possible High Helium Boxel',string.format("%.2f", mat.percent) .. '% Helium'
+            end
+        end
+    end
+end
+
+::End::
